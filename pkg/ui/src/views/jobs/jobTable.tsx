@@ -17,9 +17,9 @@ import {JobStatusCell} from "oss/src/views/jobs/jobStatusCell";
 import Empty from "src/views/app/components/empty";
 import {SortSetting} from "oss/src/views/shared/components/sortabletable";
 import {CachedDataReducerState} from "oss/src/redux/cachedDataReducer";
-import {PaginationComponent} from "oss/src/components/pagination/pagination";
 import _ from "lodash";
 import {JobDescriptionCell} from "oss/src/views/jobs/jobDescriptionCell";
+import {Pagination, Icon} from "antd";
 import Job = cockroach.server.serverpb.JobsResponse.IJob;
 import JobsResponse = cockroach.server.serverpb.JobsResponse;
 
@@ -117,6 +117,27 @@ export class JobTable extends React.Component<JobTableProps, JobTableState> {
     </>
   )
 
+  renderPage = (_page: number, type: "page" | "prev" | "next" | "jump-prev" | "jump-next", originalElement: React.ReactNode) => {
+    switch (type) {
+      case "jump-prev":
+        return (
+          <div className="_pg-jump">
+            <Icon type="left" />
+            <span className="_jump-dots">•••</span>
+          </div>
+        );
+      case "jump-next":
+        return (
+          <div className="_pg-jump">
+            <Icon type="right" />
+            <span className="_jump-dots">•••</span>
+          </div>
+        );
+      default:
+        return originalElement;
+    }
+  }
+
   render() {
     const jobs = this.props.jobs.data.jobs;
     const { pagination } = this.state;
@@ -147,8 +168,12 @@ export class JobTable extends React.Component<JobTableProps, JobTableState> {
             renderNoResult={this.noJobResult()}
           />
         </section>
-        <PaginationComponent
-          pagination={{ ...pagination, total: jobs.length }}
+        <Pagination
+          size="small"
+          itemRender={this.renderPage as (page: number, type: "page" | "prev" | "next" | "jump-prev" | "jump-next") => React.ReactNode}
+          pageSize={pagination.pageSize}
+          current={pagination.current}
+          total={jobs.length}
           onChange={this.onChangePage}
           hideOnSinglePage
         />
